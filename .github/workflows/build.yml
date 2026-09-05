@@ -75,6 +75,9 @@ jobs:
         path: ~/.platformio
         key: ${{ runner.os }}-platformio
 
+    - name: Test LR1121 transmit masks
+      run: python src/python/test_tools/test_lr1121_tx_mask.py
+
     - name: Run PlatformIO Tests
       run: |
         cd src
