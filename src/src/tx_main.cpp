@@ -180,6 +180,7 @@ void ICACHE_RAM_ATTR ProcessOtaDataDl(uint8_t pi1, uint8_t pi2, uint8_t *data1, 
 {
   static uint8_t packageIndexRadio1 = 0xFF;
   static uint8_t packageIndexRadio2 = 0xFF;
+  static size_t geminiDataLen = 0;
   constexpr size_t geminiSpanBufferSize = 2 * ELRS8_DATA_DL_BYTES_PER_CALL; // 2 * whatever the largest payload will be
   static uint8_t geminiSpanBuffer[geminiSpanBufferSize] = {0};
 
@@ -187,6 +188,16 @@ void ICACHE_RAM_ATTR ProcessOtaDataDl(uint8_t pi1, uint8_t pi2, uint8_t *data1, 
   // Build the "span" buffer from the two downlink packet buffers as the two halves come in
   if (inGeminiMode())
   {
+      // LINKSTATS and DATA carry different payload lengths. A retry can keep
+      // the same package index while changing the split point, so an old half
+      // must not be combined with the other radio's differently sized retry.
+      if (geminiDataLen != dataLen)
+      {
+          packageIndexRadio1 = 0xFF;
+          packageIndexRadio2 = 0xFF;
+          geminiDataLen = dataLen;
+      }
+
       if (Radio.GetProcessingPacketRadio() == SX12XX_Radio_1)
       {
           packageIndexRadio1 = pi1;
