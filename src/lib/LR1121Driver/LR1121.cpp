@@ -661,9 +661,15 @@ void ICACHE_RAM_ATTR LR1121Driver::TXnb(uint8_t *data, const bool sendGeminiBuff
     codec->encode(outBuffer, data, PayloadLength);
     if (sendGeminiBuffer)
     {
-        hal.WriteCommand(LR11XX_RADIO_WRITE_BUFFER8_SET_TX, outBuffer, length, SX12XX_Radio_1);
-        codec->encode(outBuffer, dataGemini, PayloadLength);
-        hal.WriteCommand(LR11XX_RADIO_WRITE_BUFFER8_SET_TX, outBuffer, length, SX12XX_Radio_2);
+        if (radioNumber & SX12XX_Radio_1)
+        {
+            hal.WriteCommand(LR11XX_RADIO_WRITE_BUFFER8_SET_TX, outBuffer, length, SX12XX_Radio_1);
+        }
+        if (radioNumber & SX12XX_Radio_2)
+        {
+            codec->encode(outBuffer, dataGemini, PayloadLength);
+            hal.WriteCommand(LR11XX_RADIO_WRITE_BUFFER8_SET_TX, outBuffer, length, SX12XX_Radio_2);
+        }
     }
     else
     {
